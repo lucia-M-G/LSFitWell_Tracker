@@ -20,7 +20,7 @@ CREATE TABLE activitats_raw (
 );
 
 -- 4. Càrrega de dades des del fitxer CSV
-LOAD DATA LOCAL INFILE '/ruta/al/fitxer/activitats.csv'
+LOAD DATA LOCAL INFILE 'C:\Users\Administrador\Desktop\LaSalle\WebDigitalització\Practica CV\LSFitWell_Tracker\activitats.csv'
 INTO TABLE activitats_raw
 FIELDS TERMINATED BY ',' 
 ENCLOSED BY '"'
