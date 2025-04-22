@@ -1,0 +1,23 @@
+Genera un archivo CSV en formato UTF-8 con al menos 100 registros ficticios de actividades físicas simulando
+datos de la aplicación LSFitWell. Los datos deben ser realistas y variados, cumpliendo con las siguientes especificaciones:
+
+Estructura del CSV (columnas):
+    id_usuari: Número entero entre 1 y 10 (ej: 3).
+    data_activitat: Fecha en formato YYYY-MM-DD (ej: 2024-06-15).
+    hora_inici: Hora en formato HH:MM (ej: 07:30 o 18:45).
+    durada_minuts: Número entero entre 5 y 120 minutos (ej: 45).
+    tipus_activitat: Uno de estos valores: caminar, córrer, bicicleta, ioga, natació, tennis, futbol, gimnàs.
+    calories: Número entero entre 30 y 1000 (ej: 250).
+    dispositiu: Uno de estos valores: smartwatch, mòbil, pulsera.
+
+Requisitos adicionales:
+    Variedad: Distribuye los registros equilibradamente entre usuarios, tipos de actividad y dispositivos.
+
+    Realismo:
+        Las actividades intensas (córrer, futbol) deben tener más calorías quemadas que las leves (ioga, caminar).
+        Las horas de inicio deben ser coherentes (ej: ioga por la mañana, futbol por la tarde).
+
+    Formato CSV:
+        Usar comas (,) como delimitadores.
+        Incluir una fila de encabezados con los nombres de las columnas.
+        No usar comillas a menos que sea necesario.
