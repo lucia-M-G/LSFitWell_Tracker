@@ -21,12 +21,13 @@ DELIMITER //
 CREATE PROCEDURE netejar_dades()
 BEGIN
 	TRUNCATE TABLE activitats_net;
-	INSERT INTO activitats_net
-	SELECT id_usuari, data_activitat, hora_inici, durada_minuts, 
-		tipus_activitat, calories, dispositiu,
-		DAYOFWEEK(data_activitat) IN (1,7) AS es_cap_setmana
-	FROM activitats_raw
-	WHERE data_activitat = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+	
+    INSERT INTO activitats_net
+        SELECT id_usuari, data_activitat, hora_inici, durada_minuts, 
+            tipus_activitat, calories, dispositiu,
+            DAYOFWEEK(data_activitat) IN (1,7) AS es_cap_setmana
+        FROM activitats_raw
+        WHERE data_activitat = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
 END //
 DELIMITER ;
 
