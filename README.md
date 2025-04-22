@@ -46,7 +46,7 @@ LSFitWell_Tracker/
 - Permisos: Usuario con privilegios de administrador para creación de roles y eventos
 
 ## 📜 Licencia
-MIT LISENCE - Ver [LICENSE](LICENSE) para más detalles.
+MIT LICENSE - Ver [LICENSE](LICENSE) para más detalles.
 
 ## 👨🏻‍💻 Autores
 💻 **Jordi Fernández Arlegui** <br>
