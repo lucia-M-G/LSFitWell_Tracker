@@ -21,7 +21,7 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 -- Ignora la capçalera del CSV
-IGNORE 1 ROWS; 
+IGNORE 3 ROWS; 
 
 -- Verificació de la càrrega
 SELECT COUNT(*) AS total_registres FROM activitats_raw;
