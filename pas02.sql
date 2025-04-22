@@ -13,11 +13,14 @@ CREATE TABLE IF NOT EXISTS activitats_net (
 ALTER TABLE activitats_net
 	ADD COLUMN es_cap_setmana BOOLEAN;
 
+
+
 DROP PROCEDURE IF EXISTS netejar_dades;
 
 DELIMITER //
 CREATE PROCEDURE netejar_dades()
 BEGIN
+	TRUNCATE TABLE activitats_net;
 	INSERT INTO activitats_net
 	SELECT id_usuari, data_activitat, hora_inici, durada_minuts, 
 		tipus_activitat, calories, dispositiu,
@@ -26,6 +29,26 @@ BEGIN
 	WHERE data_activitat = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
 END //
 DELIMITER ;
+
+
+
+SET GLOBAL event_scheduler=ON;
+
+DROP EVENT evento_netejar_dades;
+
+DELIMITER //
+	CREATE EVENT evento_netejar_original
+	ON SCHEDULE
+		EVERY 1 DAY
+		STARTS NOW()
+	DO
+	BEGIN
+		TRUNCATE TABLE activitats_net;
+		CALL netejar_dades();
+	END //
+DELIMITER ;
+
+
 
 CALL netejar_dades();
 
