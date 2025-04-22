@@ -1,7 +1,12 @@
-
 -- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
 
--- Creació de la taula temporal activitats_raw
+-- 1. Crear la base de datos si no existe
+CREATE DATABASE IF NOT EXISTS lsfitwell;
+
+-- 2. Seleccionar la base de datos
+USE lsfitwell;
+
+-- 3. Creació de la taula temporal activitats_raw
 DROP TABLE IF EXISTS activitats_raw;
 
 CREATE TABLE activitats_raw (
@@ -14,14 +19,14 @@ CREATE TABLE activitats_raw (
     dispositiu VARCHAR(50)
 );
 
--- Càrrega de dades des del fitxer CSV
-LOAD DATA INFILE 'C:\Users\Administrador\Desktop\LaSalle\WebDigitalització\Practica CV\LSFitWell_Tracker\activitats.csv'
+-- 4. Càrrega de dades des del fitxer CSV
+LOAD DATA LOCAL INFILE '/ruta/al/fitxer/activitats.csv'
 INTO TABLE activitats_raw
 FIELDS TERMINATED BY ',' 
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 -- Ignora la capçalera del CSV
-IGNORE 3 ROWS; 
+IGNORE 3 ROWS;
 
--- Verificació de la càrrega
+-- 5. Verificació de la càrrega
 SELECT COUNT(*) AS total_registres FROM activitats_raw;
