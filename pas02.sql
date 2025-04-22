@@ -1,6 +1,6 @@
 TRUNCATE TABLE activitats_net;
 
-CREATE TABLE activitats_net (
+CREATE TABLE IF NOT EXISTS activitats_net (
     id_usuari INT,
     data_activitat DATE,
     hora_inici TIME,
@@ -13,7 +13,7 @@ CREATE TABLE activitats_net (
 ALTER TABLE activitats_net
 	ADD COLUMN es_cap_setmana BOOLEAN;
 
-DROP PROCEDURE netejar_dades;
+DROP PROCEDURE IF EXISTS netejar_dades;
 
 DELIMITER //
 CREATE PROCEDURE netejar_dades()
@@ -26,6 +26,8 @@ BEGIN
 	WHERE data_activitat = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
 END //
 DELIMITER ;
+
+CALL netejar_dades();
 
 SELECT *
 	FROM activitats_net;
