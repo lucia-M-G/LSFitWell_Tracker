@@ -53,5 +53,6 @@ DELIMITER //
 	END //
 DELIMITER ;
 
+
 SELECT *
 	FROM control_carregues;

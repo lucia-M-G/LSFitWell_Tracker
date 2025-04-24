@@ -23,27 +23,32 @@ CREATE TABLE IF NOT EXISTS registre_canvis (
     -- Detalls addicionals
     canvis_realitzats TEXT,
     
-    PRIMARY KEY (data_hora, usuari_mysql, taula_origen)
+    id_registre INT AUTO_INCREMENT PRIMARY KEY
 );
 
 -- 2. Trigger per insercions
 
-DROP TRIGGER audit_activitats_simple_insert;
+DROP TRIGGER IF EXISTS registre_canvis_insert;
 
 DELIMITER //
-CREATE TRIGGER audit_activitats_simple_insert
-AFTER INSERT ON activitats_net
-FOR EACH ROW
-BEGIN
-    INSERT INTO audit_activitats_simplificada (
-        accio, taula_origen, id_usuari, data_activitat, hora_inici,
-        durada_minuts, tipus_activitat, calories, dispositiu, es_cap_setmana,
-        usuari_mysql, data_hora, canvis_realitzats
-    )
-    VALUES (
-        'INSERT', 'activitats_net', activitats_net.id_usuari, activitats_net.data_activitat, activitats_net.hora_inici,
-        activitats_net.durada_minuts, activitats_net.tipus_activitat, activitats_net.calories, activitats_net.dispositiu, activitats_net.es_cap_setmana,
-        CURRENT_USER(), NOW(), 'Nova activitat registrada'
-    );
-END //
+CREATE TRIGGER registre_canvis_insert
+	AFTER INSERT ON activitats_net
+	FOR EACH ROW
+	BEGIN
+		INSERT INTO registre_canvis (
+			accio, taula_origen, id_usuari, data_activitat, hora_inici,
+			durada_minuts, tipus_activitat, calories, dispositiu, es_cap_setmana,
+			usuari_mysql, data_hora, canvis_realitzats
+		)
+		VALUES (
+			'INSERT', 'activitats_net', NEW.id_usuari, NEW.data_activitat, NEW.hora_inici,
+			NEW.durada_minuts, NEW.tipus_activitat, NEW.calories, NEW.dispositiu, NEW.es_cap_setmana,
+			CURRENT_USER(), NOW(), 'Nova activitat registrada'
+		);
+	END //
 DELIMITER ;
+
+
+
+SELECT *
+	FROM registre_canvis;

@@ -32,7 +32,6 @@ END //
 DELIMITER ;
 
 
-
 SET GLOBAL event_scheduler=ON;
 
 DROP EVENT IF EXISTS evento_netejar_dades;
@@ -48,7 +47,6 @@ DELIMITER //
 		CALL netejar_dades();
 	END //
 DELIMITER ;
-
 
 
 SELECT *

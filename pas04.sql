@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS MD_activitat;
 
+TRUNCATE TABLE MD_activitat;
+
 CREATE TABLE MD_activitat (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	nom VARCHAR(50) UNIQUE,
@@ -30,7 +32,6 @@ DELIMITER //
 		STARTS NOW()
 	DO
 	BEGIN
-		TRUNCATE TABLE activitats_net;
 		CALL netejar_dades();
         CALL omplir_cataleg_activitats();
 	END //
