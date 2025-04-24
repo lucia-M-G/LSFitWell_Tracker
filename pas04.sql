@@ -15,10 +15,8 @@ BEGIN
 	INSERT INTO MD_activitat (nom, descripcio)
     SELECT DISTINCT tipus_activitat, 
            CONCAT('Activitat de tipus: ', tipus_activitat)
-    FROM activitats_net
-    WHERE tipus_activitat NOT IN (SELECT nom FROM MD_activitat)
-		AND tipus_activitat IS NOT NULL
-		AND tipus_activitat != '';
+		FROM activitats_net
+		WHERE tipus_activitat NOT IN (SELECT nom FROM MD_activitat);
     
 END //
 DELIMITER ;
