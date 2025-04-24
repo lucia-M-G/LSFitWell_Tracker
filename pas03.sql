@@ -1,4 +1,4 @@
-DROP TABLE control_carregues;
+TRUNCATE TABLE control_carregues;
 
 CREATE TABLE control_carregues (
 	nom_fitxer VARCHAR(100),
