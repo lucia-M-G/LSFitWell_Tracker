@@ -1,4 +1,4 @@
-TRUNCATE TABLE control_carregues;
+DROP TABLE IF EXISTS control_carregues;
 
 CREATE TABLE control_carregues (
 	nom_fitxer VARCHAR(100),
@@ -39,7 +39,7 @@ DELIMITER ;
 
 SET GLOBAL event_scheduler=ON;
 
-DROP EVENT evento_netejar_dades;
+DROP EVENT IF EXISTS evento_netejar_dades;
 
 DELIMITER //
 	CREATE EVENT evento_netejar_dades
@@ -52,7 +52,6 @@ DELIMITER //
 		CALL netejar_dades();
 	END //
 DELIMITER ;
-CALL netejar_dades();
 
 SELECT *
 	FROM control_carregues;

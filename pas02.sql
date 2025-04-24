@@ -1,4 +1,4 @@
-TRUNCATE TABLE activitats_net;
+DROP TABLE IF EXISTS activitats_net;
 
 CREATE TABLE IF NOT EXISTS activitats_net (
     id_usuari INT,
@@ -35,7 +35,7 @@ DELIMITER ;
 
 SET GLOBAL event_scheduler=ON;
 
-DROP EVENT evento_netejar_dades;
+DROP EVENT IF EXISTS evento_netejar_dades;
 
 DELIMITER //
 	CREATE EVENT evento_netejar_dades
@@ -50,8 +50,6 @@ DELIMITER //
 DELIMITER ;
 
 
-
-CALL netejar_dades();
 
 SELECT *
 	FROM activitats_net;
