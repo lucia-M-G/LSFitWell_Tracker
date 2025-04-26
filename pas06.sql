@@ -126,37 +126,23 @@ BEGIN
 END //
 DELIMITER ;
 
-
-
 -- Testing
 
--- Ver inserciones recientes
-SELECT * FROM registre_INSERT_activitats_net 
-ORDER BY data_hora DESC LIMIT 5;
+-- Cridar el event evento_netejar_dades del pas04
+SELECT * 
+	FROM registre_INSERT_activitats_net;
 
--- Ver actualizaciones con cambios
-SELECT 
-    OLD_id, OLD_nom AS 'Nombre anterior', NEW_nom AS 'Nombre nuevo',
-    OLD_descripcio AS 'Descripción anterior', NEW_descripcio AS 'Descripción nueva',
-    usuari_mysql AS 'Usuario', data_hora AS 'Fecha'
-FROM registre_UPDATE_md_activitat
-ORDER BY data_hora DESC;
 
--- Ver eliminaciones
-SELECT * FROM registre_DELETE_md_activitat
-ORDER BY data_hora DESC;
-
--- Probar inserción (se activará automáticamente al cargar datos)
-CALL netejar_dades();
-
--- Probar actualización con cambios
 UPDATE MD_activitat 
-SET nom = 'yoga', descripcio = 'Exercici de relaxació' 
-WHERE nom = 'ioga';
-
+	SET nom = 'furbo', descripcio = 'viva er beti' 
+	WHERE nom = 'tennis';
+SELECT *
+	FROM registre_UPDATE_md_activitat;
+    
 -- Probar eliminación
-DELETE FROM MD_activitat WHERE nom = 'natació';
-
--- Ver resultados
-SELECT * FROM registre_UPDATE_md_activitat;
-SELECT * FROM registre_DELETE_md_activitat;
+DELETE FROM MD_activitat WHERE nom = 'futbol';
+SELECT * 
+	FROM registre_DELETE_md_activitat;
+    
+SELECT *
+	FROM MD_activitat;
