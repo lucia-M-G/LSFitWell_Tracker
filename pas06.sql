@@ -20,10 +20,7 @@ CREATE TABLE IF NOT EXISTS registre_INSERT_activitats_net (
     -- Metadades
     usuari_mysql VARCHAR(100),
     data_hora TIMESTAMP,
-    
-    -- Detalls addicionals
-    canvis_realitzats TEXT,
-    
+     
     id_registre INT AUTO_INCREMENT PRIMARY KEY
 );
 
@@ -38,9 +35,6 @@ CREATE TABLE IF NOT EXISTS registre_DELETE_md_activitat (
     -- Metadades
     usuari_mysql VARCHAR(100),
     data_hora TIMESTAMP,
-    
-    -- Detalls addicionals
-    canvis_realitzats TEXT,
     
 	id_registre INT AUTO_INCREMENT PRIMARY KEY
 );
@@ -61,9 +55,6 @@ CREATE TABLE IF NOT EXISTS registre_UPDATE_md_activitat (
     usuari_mysql VARCHAR(100),
     data_hora TIMESTAMP,
     
-    -- Detalls addicionals
-    canvis_realitzats TEXT,
-    
    	id_registre INT AUTO_INCREMENT PRIMARY KEY
 );
 
@@ -78,13 +69,13 @@ FOR EACH ROW
 BEGIN
     INSERT INTO registre_INSERT_activitats_net (
         id_usuari, data_activitat, hora_inici,
-        durada_minuts, tipus_activitat, calories, dispositiu, es_cap_setmana,
-        usuari_mysql, data_hora, canvis_realitzats
+        durada_minuts, tipus_activitat, calories, 
+        dispositiu, es_cap_setmana, usuari_mysql
     )
     VALUES (
         NEW.id_usuari, NEW.data_activitat, NEW.hora_inici,
-        NEW.durada_minuts, NEW.tipus_activitat, NEW.calories, NEW.dispositiu, NEW.es_cap_setmana,
-        CURRENT_USER(), NOW(), 'Nova activitat registrada'
+        NEW.durada_minuts, NEW.tipus_activitat, NEW.calories,
+        NEW.dispositiu, NEW.es_cap_setmana, CURRENT_USER()
     );
 END //
 DELIMITER ;
@@ -94,36 +85,22 @@ DELIMITER ;
 
 DROP TRIGGER IF EXISTS md_activitat_update;
 
-DROP TRIGGER IF EXISTS md_activitat_update;
-
 DELIMITER //
 CREATE TRIGGER md_activitat_update
 AFTER UPDATE ON MD_activitat
 FOR EACH ROW
 BEGIN
-    DECLARE cambios TEXT;
-    
-    -- Detectar cambios específicos
-    SET cambios = '';
-    IF OLD.nom != NEW.nom THEN
-        SET cambios = CONCAT(cambios, 'Nom canviat de "', OLD.nom, '" a "', NEW.nom, '" | ');
-    END IF;
-    
-    IF OLD.descripcio != NEW.descripcio THEN
-        SET cambios = CONCAT(cambios, 'Descripció modificada | ');
-    END IF;
-    
     -- Registrar solo si hay cambios reales
-    IF cambios != '' THEN
+    IF OLD.nom != NEW.nom OR OLD.descripcio != NEW.descripcio THEN
         INSERT INTO registre_UPDATE_md_activitat (
             NEW_id, NEW_nom, NEW_descripcio,
             OLD_id, OLD_nom, OLD_descripcio,
-            usuari_mysql, data_hora, canvis_realitzats
+            usuari_mysql
         )
         VALUES (
             NEW.id, NEW.nom, NEW.descripcio,
             OLD.id, OLD.nom, OLD.descripcio,
-            CURRENT_USER(), NOW(), cambios
+            CURRENT_USER()
         );
     END IF;
 END //
@@ -141,13 +118,10 @@ BEFORE DELETE ON MD_activitat
 FOR EACH ROW
 BEGIN
     INSERT INTO registre_DELETE_md_activitat (
-        id, nom, descripcio,
-        usuari_mysql, data_hora, canvis_realitzats
+        id, nom, descripcio, usuari_mysql
     )
     VALUES (
-        OLD.id, OLD.nom, OLD.descripcio,
-        CURRENT_USER(), NOW(), 
-        CONCAT('Activitat eliminada: ', OLD.nom)
+        OLD.id, OLD.nom, OLD.descripcio, CURRENT_USER()
     );
 END //
 DELIMITER ;
@@ -156,17 +130,33 @@ DELIMITER ;
 
 -- Testing
 
--- 1. Probar INSERT
+-- Ver inserciones recientes
+SELECT * FROM registre_INSERT_activitats_net 
+ORDER BY data_hora DESC LIMIT 5;
+
+-- Ver actualizaciones con cambios
+SELECT 
+    OLD_id, OLD_nom AS 'Nombre anterior', NEW_nom AS 'Nombre nuevo',
+    OLD_descripcio AS 'Descripción anterior', NEW_descripcio AS 'Descripción nueva',
+    usuari_mysql AS 'Usuario', data_hora AS 'Fecha'
+FROM registre_UPDATE_md_activitat
+ORDER BY data_hora DESC;
+
+-- Ver eliminaciones
+SELECT * FROM registre_DELETE_md_activitat
+ORDER BY data_hora DESC;
+
+-- Probar inserción (se activará automáticamente al cargar datos)
 CALL netejar_dades();
 
--- 2. Probar UPDATE
+-- Probar actualización con cambios
 UPDATE MD_activitat 
-SET nom = 'yoga', descripcio = 'Exercici de relaxació i flexibilitat' 
+SET nom = 'yoga', descripcio = 'Exercici de relaxació' 
 WHERE nom = 'ioga';
 
--- 3. Provar DELETE
-DELETE FROM MD_activitat WHERE nom = 'tennis';
+-- Probar eliminación
+DELETE FROM MD_activitat WHERE nom = 'natació';
 
--- 4. Verificar resultats
+-- Ver resultados
 SELECT * FROM registre_UPDATE_md_activitat;
 SELECT * FROM registre_DELETE_md_activitat;
