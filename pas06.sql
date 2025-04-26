@@ -73,20 +73,20 @@ DROP TRIGGER IF EXISTS registre_canvis_insert;
 
 DELIMITER //
 CREATE TRIGGER registre_canvis_insert
-	AFTER INSERT ON activitats_net
-	FOR EACH ROW
-	BEGIN
-		INSERT INTO registre_INSERT_activitats_net (
-			id_usuari, data_activitat, hora_inici,
-			durada_minuts, tipus_activitat, calories, dispositiu, es_cap_setmana,
-			usuari_mysql, data_hora, canvis_realitzats
-		)
-		VALUES (
-			NEW.id_usuari, NEW.data_activitat, NEW.hora_inici,
-			NEW.durada_minuts, NEW.tipus_activitat, NEW.calories, NEW.dispositiu, NEW.es_cap_setmana,
-			CURRENT_USER(), NOW(), 'Nova activitat registrada'
-		);
-	END //
+AFTER INSERT ON activitats_net
+FOR EACH ROW
+BEGIN
+    INSERT INTO registre_INSERT_activitats_net (
+        id_usuari, data_activitat, hora_inici,
+        durada_minuts, tipus_activitat, calories, dispositiu, es_cap_setmana,
+        usuari_mysql, data_hora, canvis_realitzats
+    )
+    VALUES (
+        NEW.id_usuari, NEW.data_activitat, NEW.hora_inici,
+        NEW.durada_minuts, NEW.tipus_activitat, NEW.calories, NEW.dispositiu, NEW.es_cap_setmana,
+        CURRENT_USER(), NOW(), 'Nova activitat registrada'
+    );
+END //
 DELIMITER ;
 
 
@@ -94,33 +94,39 @@ DELIMITER ;
 
 DROP TRIGGER IF EXISTS md_activitat_update;
 
+DROP TRIGGER IF EXISTS md_activitat_update;
+
 DELIMITER //
 CREATE TRIGGER md_activitat_update
-	BEFORE UPDATE ON MD_activitat
-	FOR EACH ROW
-	BEGIN
-		DECLARE cambios TEXT;
-		
-		-- Detectar cambios específicos
-		SET cambios = '';
-		IF OLD.nom != NEW.nom THEN
-			SET cambios = CONCAT(cambios, 'Antic nom: "', OLD.nom, '"Nou nom: "', NEW.nom, '"\n'); -- Miramos la FK
-		END IF;
-		
-		IF OLD.descripcio != NEW.descripcio THEN
-			SET cambios = CONCAT(cambios, 'Descripció modificada\n'); -- Miramos la descipcion
-		END IF;
-		
-		-- Registrar solo si hay cambios reales
-		IF cambios != '' THEN
-			INSERT INTO registre_UPDATE_md_activitat (
-				
-			)
-			VALUES (
-				
-			);
-		END IF;
-	END //
+AFTER UPDATE ON MD_activitat
+FOR EACH ROW
+BEGIN
+    DECLARE cambios TEXT;
+    
+    -- Detectar cambios específicos
+    SET cambios = '';
+    IF OLD.nom != NEW.nom THEN
+        SET cambios = CONCAT(cambios, 'Nom canviat de "', OLD.nom, '" a "', NEW.nom, '" | ');
+    END IF;
+    
+    IF OLD.descripcio != NEW.descripcio THEN
+        SET cambios = CONCAT(cambios, 'Descripció modificada | ');
+    END IF;
+    
+    -- Registrar solo si hay cambios reales
+    IF cambios != '' THEN
+        INSERT INTO registre_UPDATE_md_activitat (
+            NEW_id, NEW_nom, NEW_descripcio,
+            OLD_id, OLD_nom, OLD_descripcio,
+            usuari_mysql, data_hora, canvis_realitzats
+        )
+        VALUES (
+            NEW.id, NEW.nom, NEW.descripcio,
+            OLD.id, OLD.nom, OLD.descripcio,
+            CURRENT_USER(), NOW(), cambios
+        );
+    END IF;
+END //
 DELIMITER ;
 
 
@@ -131,18 +137,36 @@ DROP TRIGGER IF EXISTS md_activitat_delete;
 
 DELIMITER //
 CREATE TRIGGER md_activitat_delete
-	BEFORE DELETE ON MD_activitat
-	FOR EACH ROW
-	BEGIN
-		INSERT INTO registre_DELETE_md_activitat (
-			
-		)
-		VALUES (
-			
-		);
-	END //
+BEFORE DELETE ON MD_activitat
+FOR EACH ROW
+BEGIN
+    INSERT INTO registre_DELETE_md_activitat (
+        id, nom, descripcio,
+        usuari_mysql, data_hora, canvis_realitzats
+    )
+    VALUES (
+        OLD.id, OLD.nom, OLD.descripcio,
+        CURRENT_USER(), NOW(), 
+        CONCAT('Activitat eliminada: ', OLD.nom)
+    );
+END //
 DELIMITER ;
 
 
-SELECT *
-	FROM registre_canvis;
+
+-- Testing
+
+-- 1. Probar INSERT
+CALL netejar_dades();
+
+-- 2. Probar UPDATE
+UPDATE MD_activitat 
+SET nom = 'yoga', descripcio = 'Exercici de relaxació i flexibilitat' 
+WHERE nom = 'ioga';
+
+-- 3. Provar DELETE
+DELETE FROM MD_activitat WHERE nom = 'tennis';
+
+-- 4. Verificar resultats
+SELECT * FROM registre_UPDATE_md_activitat;
+SELECT * FROM registre_DELETE_md_activitat;
