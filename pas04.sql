@@ -1,3 +1,5 @@
+-- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
+
 DROP TABLE IF EXISTS MD_activitat;
 
 TRUNCATE TABLE MD_activitat;

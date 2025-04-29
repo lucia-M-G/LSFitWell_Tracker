@@ -1,3 +1,5 @@
+-- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
+
 CREATE DATABASE IF NOT EXISTS LSFitWell;
 
 TRUNCATE TABLE activitats_raw;

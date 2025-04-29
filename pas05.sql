@@ -1,3 +1,5 @@
+-- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
+
 DROP PROCEDURE IF EXISTS omplir_cataleg_activitats;
 
 DELIMITER //

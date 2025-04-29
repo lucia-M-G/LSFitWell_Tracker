@@ -1,3 +1,5 @@
+-- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
+
 -- 1. Crear la base de dades de backup
 CREATE DATABASE IF NOT EXISTS lsfitwell_backup;
 

@@ -1,3 +1,5 @@
+-- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
+
 -- No creem un segon fitxer CSV doncs no hi ha necessitat, doncs ja podem comrpovar el seu
 -- correcte funcionament amb el CSV original
 

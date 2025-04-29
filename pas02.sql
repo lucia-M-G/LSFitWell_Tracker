@@ -1,3 +1,5 @@
+-- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
+
 DROP TABLE IF EXISTS activitats_net;
 
 CREATE TABLE IF NOT EXISTS activitats_net (
