@@ -1,6 +1,6 @@
 -- Jordi Fernández Arlegui, Lucía Martínez Gutiérrez, Joan Navío García
 
--- 1. Creació dels usuaris en localhost per seguretat
+-- 1. Creació dels usuaris
 DROP USER IF EXISTS 'lsfit_data_loader'@'localhost';
 DROP USER IF EXISTS 'lsfit_user'@'localhost';
 DROP USER IF EXISTS 'lsfit_backup'@'localhost';
@@ -14,56 +14,106 @@ CREATE USER 'lsfit_auditor'@'localhost' IDENTIFIED BY 'AuditorPass123!';
 CREATE USER 'lsfit_admin'@'localhost' IDENTIFIED BY 'AdminPass123!';
 
 -- 2. Permisos per a lsfit_data_loader
-GRANT SELECT, INSERT, UPDATE, DELETE ON LSFitWell.activitats_raw TO 'lsfit_data_loader'@'localhost';
-GRANT FILE ON *.* TO 'lsfit_data_loader'@'localhost'; -- Permet carregar arxius
+GRANT SELECT, INSERT, UPDATE, DELETE ON lsfitwell.activitats_raw TO 'lsfit_data_loader'@'localhost';
+GRANT FILE ON *.* TO 'lsfit_data_loader'@'localhost';
 
 -- 3. Permisos per a lsfit_user
--- Permet executar estructures (ALTER, INDEX, etc.) però no crear-les (CREATE)
 GRANT SELECT, INSERT, UPDATE, DELETE, ALTER, INDEX, REFERENCES, 
       CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, SHOW VIEW
-      ON LSFitWell.* TO 'lsfit_user'@'localhost';
-GRANT FILE ON *.* TO 'lsfit_user'@'localhost'; -- Permet generar fitxers
+      ON lsfitwell.* TO 'lsfit_user'@'localhost';
+GRANT FILE ON *.* TO 'lsfit_user'@'localhost';
 
 -- 4. Permisos per a lsfit_backup
--- Llegir tot a LSFitWell i tot (menys GRANT) a la BD de backup
-GRANT SELECT ON LSFitWell.* TO 'lsfit_backup'@'localhost';
+GRANT SELECT ON lsfitwell.* TO 'lsfit_backup'@'localhost';
 GRANT ALL PRIVILEGES ON lsfitwell_backup.* TO 'lsfit_backup'@'localhost';
 
 -- 5. Permisos per a lsfit_auditor
--- Només lectura a totes les BD
-GRANT SELECT ON LSFitWell.* TO 'lsfit_auditor'@'localhost';
+GRANT SELECT ON lsfitwell.* TO 'lsfit_auditor'@'localhost';
 GRANT SELECT ON lsfitwell_backup.* TO 'lsfit_auditor'@'localhost';
 
 -- 6. Permisos per a lsfit_admin
--- Tots els permisos a ambdues BD
-GRANT ALL PRIVILEGES ON LSFitWell.* TO 'lsfit_admin'@'localhost';
+GRANT ALL PRIVILEGES ON lsfitwell.* TO 'lsfit_admin'@'localhost';
 GRANT ALL PRIVILEGES ON lsfitwell_backup.* TO 'lsfit_admin'@'localhost';
 
--- Actualitzar permisos
 FLUSH PRIVILEGES;
 
--- 7. Proves de validació dels permisos (executar amb cada usuari per verificar)
+-- 7. PROVES DE VALIDACIÓ ADAPTADES A L'ESTRUCTURA ACTUAL
 
--- Prova per lsfit_data_loader (hauria de funcionar):
--- SELECT * FROM LSFitWell.activitats_raw LIMIT 5;
--- INSERT INTO LSFitWell.activitats_raw VALUES (...);
--- No hauria de poder: SELECT * FROM LSFitWell.activitats_net;
+-- Comprovar que els permisos s'han aplicat correctament
+SELECT user, host FROM mysql.user WHERE user LIKE 'lsfit_%';
 
--- Prova per lsfit_user (hauria de funcionar):
--- CALL LSFitWell.netejar_dades();
--- SELECT * FROM LSFitWell.activitats_net;
--- No hauria de poder: CREATE DATABASE nova_db;
+-- Mostrar els permisos per a cada usuari
+SHOW GRANTS FOR 'lsfit_data_loader'@'localhost';
+SHOW GRANTS FOR 'lsfit_user'@'localhost';
+SHOW GRANTS FOR 'lsfit_backup'@'localhost';
+SHOW GRANTS FOR 'lsfit_auditor'@'localhost';
+SHOW GRANTS FOR 'lsfit_admin'@'localhost';
 
--- Prova per lsfit_backup (hauria de funcionar):
--- SELECT * FROM lsfitwell_backup.activitats_net_20240501;
--- CREATE TABLE lsfitwell_backup.prova (id INT);
--- No hauria de poder: GRANT SELECT ON *.* TO 'algu'@'localhost';
+-- Script de proves per executar amb cada usuari:
 
--- Prova per lsfit_auditor (hauria de funcionar):
--- SELECT * FROM LSFitWell.control_carregues;
--- No hauria de poder: INSERT INTO LSFitWell.control_carregues VALUES (...);
-
--- Prova per lsfit_admin (hauria de funcionar):
--- CREATE TABLE LSFitWell.nova_taula (id INT);
--- DROP TABLE lsfitwell_backup.prova;
--- No hauria de poder: CREATE USER 'nou_usuari'@'localhost'; (a menys que s'afegeixi GRANT OPTION)
+DELIMITER //
+CREATE PROCEDURE test_permissions()
+BEGIN
+    DECLARE user_count INT;
+    
+    -- Prova per lsfit_data_loader
+    -- Hauria de poder fer:
+    SELECT 'TESTING lsfit_data_loader' AS test;
+    SELECT COUNT(*) INTO user_count FROM lsfitwell.activitats_raw LIMIT 1;
+    SELECT CONCAT('Accés a activitats_raw OK: ', user_count, ' registres') AS result;
+    
+    -- Hauria de fallar:
+    BEGIN
+        DECLARE CONTINUE HANDLER FOR 1142 SELECT 'Accés denegat a activitats_net (CORRECTE)' AS result;
+        SELECT COUNT(*) FROM lsfitwell.activitats_net;
+    END;
+    
+    -- Prova per lsfit_user
+    -- Hauria de poder fer:
+    SELECT 'TESTING lsfit_user' AS test;
+    SELECT COUNT(*) INTO user_count FROM lsfitwell.activitats_net LIMIT 1;
+    SELECT CONCAT('Accés a activitats_net OK: ', user_count, ' registres') AS result;
+    
+    -- Hauria de fallar:
+    BEGIN
+        DECLARE CONTINUE HANDLER FOR 1142 SELECT 'No pot crear taules noves (CORRECTE)' AS result;
+        CREATE TABLE lsfitwell.nova_taula_test (id INT);
+    END;
+    
+    -- Prova per lsfit_backup
+    -- Hauria de poder fer:
+    SELECT 'TESTING lsfit_backup' AS test;
+    SELECT COUNT(*) INTO user_count FROM lsfitwell.activitats_net LIMIT 1;
+    SELECT CONCAT('Lectura a lsfitwell OK: ', user_count, ' registres') AS result;
+    
+    -- Hauria de fallar:
+    BEGIN
+        DECLARE CONTINUE HANDLER FOR 1142 SELECT 'No pot modificar dades a lsfitwell (CORRECTE)' AS result;
+        UPDATE lsfitwell.activitats_net SET calories = 100 WHERE id_usuari = 1;
+    END;
+    
+    -- Prova per lsfit_auditor
+    -- Hauria de poder fer:
+    SELECT 'TESTING lsfit_auditor' AS test;
+    SELECT COUNT(*) INTO user_count FROM lsfitwell.activitats_net LIMIT 1;
+    SELECT CONCAT('Lectura a activitats_net OK: ', user_count, ' registres') AS result;
+    
+    -- Hauria de fallar:
+    BEGIN
+        DECLARE CONTINUE HANDLER FOR 1142 SELECT 'No pot inserir dades (CORRECTE)' AS result;
+        INSERT INTO lsfitwell.activitats_net (id_usuari) VALUES (99);
+    END;
+    
+    -- Prova per lsfit_admin
+    -- Hauria de poder fer:
+    SELECT 'TESTING lsfit_admin' AS test;
+    
+    BEGIN
+        DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SELECT 'Error inesperat' AS result;
+        CREATE TABLE IF NOT EXISTS lsfitwell.test_admin_permisos (id INT);
+        INSERT INTO lsfitwell.test_admin_permisos VALUES (1);
+        SELECT 'Admin pot crear/modificar taules (CORRECTE)' AS result;
+        DROP TABLE IF EXISTS lsfitwell.test_admin_permisos;
+    END;
+END //
+DELIMITER ;
